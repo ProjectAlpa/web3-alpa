@@ -512,11 +512,12 @@ Addons
           <p class="help-block">Keep in Mind you don't have to transform it to 18 digits.</p>
         </div>
         <div class="form-group">
-          <label for="transferToAddressInput">Add/Remove Contributors</label>
+          <label for="contributorAddressInput">Add/Remove Contributors</label>
           <div class="input-group">
-            <input type="text" class="form-control" id="transferToAddressInput">
+            <input type="text" class="form-control" id="contributorAddressInput">
             <span class="input-group-append">
-              <button class="btn btn-outline-secondary" onclick="setTransferToAddress($('#transferToAddressInput').val())" v-bind:disabled="waitForTransaction">Save</button>
+              <button class="btn btn-outline-secondary" onclick="addContributor($('#contributorAddressInput').val())" v-bind:disabled="waitForTransaction">Add</button>
+              <button class="btn btn-outline-secondary" onclick="removeContributor($('#contributorAddressInput').val())" v-bind:disabled="waitForTransaction">Remove</button>
             </span>
           </div>
           <p class="help-block">Keep in Mind you don't have to transform it to 18 digits.</p>
