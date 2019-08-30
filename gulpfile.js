@@ -82,6 +82,16 @@ function modules() {
 
 // CSS task
 function css() {
+  gulp
+    .src(["./css/**/*.css", '!css/**/*.min.css', '!css/sb-admin-2.css'])
+    .pipe(gulp.dest("./css"))
+    .pipe(rename({
+      suffix: ".min"
+    }))
+    .pipe(cleanCSS())
+    .pipe(gulp.dest("./css"))
+    .pipe(browsersync.stream());
+
   return gulp
     .src("./scss/**/*.scss")
     .pipe(plumber())
@@ -97,6 +107,7 @@ function css() {
     .pipe(header(banner, {
       pkg: pkg
     }))
+    //.pipe(uglify())
     .pipe(gulp.dest("./css"))
     .pipe(rename({
       suffix: ".min"

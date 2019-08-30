@@ -17,7 +17,8 @@
 
   <!-- Custom styles for this template-->
   <link href="css/sb-admin-2.min.css" rel="stylesheet">
-  <link href="css/app.min.css" rel="stylesheet">
+  <link href="css/app.min.css" type="text/css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 
 </head>
 
@@ -305,11 +306,13 @@ Addons
         <!-- Nav Item - User Information -->
         <li class="nav-item dropdown no-arrow">
           <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userAdress"></span>
+            <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userAdress">{{userAdress}}</span>
             <img class="img-profile rounded-circle" src="https://source.unsplash.com/user/erondu/60x60">
           </a>
           <!-- Dropdown - User Information -->
           <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+            <div id="userAccounts"></div>
+            <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="#">
               <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
               Profile
@@ -341,7 +344,7 @@ Addons
       <!-- Page Heading -->
       <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+        <!-- a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a -->
       </div>
 
       <!-- Content Row -->
@@ -354,7 +357,7 @@ Addons
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
                   <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Token Name / Symbol</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800"><span id="tokenName"></span> / <span id="tokenSymbol"></span></div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{tokenName}} / {{tokenSymbol}}</div>
                 </div>
                 <div class="col-auto">
                   <i class="fas fa-calendar fa-2x text-gray-300"></i>
@@ -371,7 +374,7 @@ Addons
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
                   <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total supply</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalSupply"></div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{totalSupply}}</div>
                 </div>
                 <div class="col-auto">
                   <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -387,7 +390,7 @@ Addons
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
                   <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Portfolio Value</div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800" id="portfolioValue"></div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">{{portfolioValue}}</div>
                 </div>
                 <div class="col-auto">
                   <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -430,7 +433,7 @@ Addons
       <div class="row no-gutters align-items-center">
         <div class="col mr-2">
           <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Your balance</div>
-          <div class="h5 mb-0 font-weight-bold text-gray-800" id="balanceOf"></div>
+          <div class="h5 mb-0 font-weight-bold text-gray-800">{{balanceOf}} {{tokenSymbol}}</div>
         </div>
         <div class="col-auto">
           <i class="fas fa-comments fa-2x text-gray-300"></i>
@@ -452,13 +455,14 @@ Addons
       <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
         <h6 class="m-0 font-weight-bold text-primary">Administration</h6>
         <div class="dropdown no-arrow">
+          <span v-if="lastTransaction">Last Transaction: <a v-bind:href="lastTransactionLink" target="_blank">{{lastTransaction}}</a></span>
           <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
           </a>
           <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
-            <div class="dropdown-header">Dropdown Header:</div>
-            <a class="dropdown-item" href="#">Action</a>
-            <a class="dropdown-item" href="#">Another action</a>
+            <div class="dropdown-header">Change Account:</div>
+            <a v-for="address in accountAdresses" v-on:click="changeDefaultAddress(address)" class="dropdown-item" href="#">{{address}}</a>
+            <!-- a onclick="app.changeDefaultAddress('0x5c1a4c00d78ca9a29be0b167c1549a60ace6dd52')" class="dropdown-item" href="#">0x5c1a4c00d78ca9a29be0b167c1549a60ace6dd52</a -->
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="#">Something else here</a>
           </div>
@@ -471,10 +475,63 @@ Addons
           <div class="input-group">
             <input type="number" min="0.0" step="0.1" max="1000000000.0" class="form-control" id="portVal" value="0.1" aria-describedby="button-addon2">
             <span class="input-group-append">
-              <button class="btn btn-outline-secondary" id="button-addon2" onclick="updatePortfolioValue($('#portVal').val())">Save</button>
+              <button class="btn btn-outline-secondary" id="button-addon2" onclick="updatePortfolioValue($('#portVal').val())" v-bind:disabled="waitForTransaction">Save</button>
             </span>
           </div>
-          <p class="help-block">Keep in Mind you don't have to transform it to 18 digits</p>
+          <p class="help-block">Keep in Mind you don't have to transform it to 18 digits.</p>
+        </div>
+        <div class="form-group">
+          <label for="buyVal">Buy Alpa Tokens</label>
+          <div class="input-group">
+            <input type="number" min="0.0" step="0.1" max="1000000000.0" class="form-control" id="buyVal" value="0.1" aria-describedby="button-addon2">
+            <span class="input-group-append">
+              <button class="btn btn-outline-secondary" onclick="buyAlpaTokens()" v-bind:disabled="waitForTransaction">Buy</button>
+            </span>
+          </div>
+          <p class="help-block">Keep in Mind you don't have to transform it to 18 digits.</p>
+        </div>
+        <div class="form-group">
+          <label for="sellVal">Sell Alpa Tokens</label>
+          <div class="input-group">
+            <input type="number" min="0.0" digits="18" step="0.1" max="1000000000.0" class="form-control" id="sellVal" value="0.1" aria-describedby="button-addon2">
+            <span class="input-group-append">
+              <button class="btn btn-outline-secondary" onclick="approveSellingAlpaTokens()" v-bind:disabled="waitForTransaction">Aprove</button>
+              <button class="btn btn-outline-secondary" onclick="sellAlpaTokens()" v-bind:disabled="waitForTransaction">Sell</button>
+            </span>
+          </div>
+          <p class="help-block">Keep in Mind you don't have to transform it to 18 digits.</p>
+        </div>
+        <div class="form-group">
+          <label for="transferToAddressInput">ETH Transfer Address: <div id="transferToAddress"></div></label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="transferToAddressInput">
+            <span class="input-group-append">
+              <button class="btn btn-outline-secondary" onclick="setTransferToAddress($('#transferToAddressInput').val())" v-bind:disabled="waitForTransaction">Save</button>
+            </span>
+          </div>
+          <p class="help-block">Keep in Mind you don't have to transform it to 18 digits.</p>
+        </div>
+        <div class="form-group">
+          <label for="transferToAddressInput">Add/Remove Contributors</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="transferToAddressInput">
+            <span class="input-group-append">
+              <button class="btn btn-outline-secondary" onclick="setTransferToAddress($('#transferToAddressInput').val())" v-bind:disabled="waitForTransaction">Save</button>
+            </span>
+          </div>
+          <p class="help-block">Keep in Mind you don't have to transform it to 18 digits.</p>
+        </div>
+        <p v-for="addr in accountAdresses">{{addr}}</p>
+        <div class="form-group">
+          <label for="freezeAddress">Freeze/Unfreeze Account</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="freezeAddress">
+            <span class="input-group-append">
+              <button class="btn btn-outline-secondary" onclick="freezeAccount($('#freezeAddress').val())" v-bind:disabled="waitForTransaction">Freeze</button>
+              <button class="btn btn-outline-secondary" onclick="unFreezeAccount($('#freezeAddress').val())" v-bind:disabled="waitForTransaction">Unfreeze</button>
+            </span>
+          </div>
+          <p class="help-block">Keep in Mind you don't have to transform it to 18 digits.</p>
         </div>
       </div>
     </div>
@@ -490,7 +547,7 @@ Addons
   <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
   <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
 </a>
-<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
+<div class="dropdown-menu dropdown-menu-right shadow animated-fade-in" aria-labelledby="dropdownMenuLink">
 <div class="dropdown-header">Dropdown Header:</div>
 <a class="dropdown-item" href="#">Action</a>
 <a class="dropdown-item" href="#">Another action</a>
@@ -527,7 +584,7 @@ Addons
   <div class="col-lg-6 mb-4">
 
     <!-- Project Card Example -->
-    <div class="card shadow mb-4">
+    <!-- div class="card shadow mb-4">
       <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">Projects</h6>
       </div>
@@ -553,10 +610,10 @@ Addons
           <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
       </div>
-    </div>
+    </div -->
 
     <!-- Color System -->
-    <div class="row">
+    <!-- div class="row">
       <div class="col-lg-6 mb-4">
         <div class="card bg-primary text-white shadow">
           <div class="card-body">
@@ -607,11 +664,11 @@ Addons
       </div>
     </div>
 
-  </div>
+  </div -->
 
-  <div class="col-lg-6 mb-4">
+  <!-- div class="col-lg-6 mb-4">
 
-    <!-- Illustrations -->
+    < Illustrations >
     <div class="card shadow mb-4">
       <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">Illustrations</h6>
@@ -625,7 +682,7 @@ Addons
       </div>
     </div>
 
-    <!-- Approach -->
+    < Approach>
     <div class="card shadow mb-4">
       <div class="card-header py-3">
         <h6 class="m-0 font-weight-bold text-primary">Development Approach</h6>
@@ -636,12 +693,13 @@ Addons
       </div>
     </div>
 
-  </div>
+  </div -->
 </div>
 
 </div>
 <!-- /.container-fluid -->
 
+</div>
 </div>
 <!-- End of Main Content -->
 
@@ -685,6 +743,12 @@ Addons
   </div>
 </div>
 
+<div class="overlay" v-bind:class="{ show: waitForTransaction }"></div>
+<div class="spanner" v-bind:class="{ show: waitForTransaction }">
+  <div class="loader"></div>
+  <p>Transaction is processing, please be patient.</p>
+</div>
+
 <!-- Bootstrap core JavaScript-->
 <script src="vendor/jquery/jquery.min.js"></script>
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -694,6 +758,7 @@ Addons
 
 <!-- Custom scripts for all pages-->
 <script src="js/sb-admin-2.min.js"></script>
+<script src="js/abi.min.js"></script>
 <script src="js/app.min.js"></script>
 
 <!-- Page level plugins -->
