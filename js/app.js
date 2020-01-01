@@ -11,6 +11,7 @@ var app = new Vue({
     tokenName: "",
     owner: "",
     transferToAddress: "",
+    sendBackAddress: "",
     portfolioValue: "",
     totalSupply: "",
     lastTransaction: "",
@@ -72,7 +73,7 @@ web3.eth.getAccounts(console.log);
 
 var smartContract = web3.eth.contract(contractAbi);
 
-var contractAddress = smartContract.at('0x9a06a31a0d331306097803008ac74ce7b856a2d8');
+var contractAddress = smartContract.at('0x692a70D2e424a56D2C6C27aA97D1a86395877b3A');
 //web3.eth.defaultAccount=web3.eth.accounts[0]
 
 updateFrontend();
@@ -187,6 +188,21 @@ function sellAlpaTokens() {
 
 function setTransferToAddress(address) {
   contractAddress.setTransferToAddress(address,function(error, result){
+    if(!error)
+    {
+      //$('#waitForTransaction').text('true');
+      app.waitForTransaction = true;
+      app.lastTransaction = result;
+      //$("#form").html(result[0]+' ('+result[1]+' years old)');
+      console.log(result);
+    }
+    else
+    console.log(error);
+  });
+}
+
+function setSendBackAddress(address) {
+  contractAddress.setSendBackAddress(address,function(error, result){
     if(!error)
     {
       //$('#waitForTransaction').text('true');
