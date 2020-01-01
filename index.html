@@ -499,7 +499,6 @@ Addons
               <button class="btn btn-outline-secondary" onclick="sellAlpaTokens()" v-bind:disabled="waitForTransaction">Sell</button>
             </span>
           </div>
-          <p class="help-block">Keep in Mind you don't have to transform it to 18 digits.</p>
         </div>
         <div class="form-group">
           <label for="transferToAddressInput">ETH Transfer Address: <div id="transferToAddress"></div></label>
@@ -509,10 +508,9 @@ Addons
               <button class="btn btn-outline-secondary" onclick="setTransferToAddress($('#transferToAddressInput').val())" v-bind:disabled="waitForTransaction">Save</button>
             </span>
           </div>
-          <p class="help-block">Keep in Mind you don't have to transform it to 18 digits.</p>
         </div>
         <div class="form-group">
-          <label for="sendBackAddressInput">ETH Transfer Address: <div id="sendBackAddress"></div></label>
+          <label for="sendBackAddressInput">ETH Send Back Address: <div id="sendBackAddress"></div></label>
           <div class="input-group">
             <input type="text" class="form-control" id="sendBackAddressInput">
             <span class="input-group-append">
