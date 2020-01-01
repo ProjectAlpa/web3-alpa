@@ -290,6 +290,17 @@ function updateFrontend() {
     console.log(error);
   });
 
+  contractAddress.sendBackAddress(function(error, result){
+    if(!error)
+    {
+      app.sendBackAddress = result.toString();
+      $("#sendBackAddress").text(result.toString());
+      console.log(result);
+    }
+    else
+    console.log(error);
+  });
+
   contractAddress.owner(function(error, result){
     if(!error)
     {
